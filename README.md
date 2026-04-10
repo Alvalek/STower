@@ -4,7 +4,7 @@ A multi-threaded port scanner built for cybersecurity education and portfolio de
 
 ##  Description
 
-This tool scans target IP addresses to identify open ports using TCP socket connections. It demonstrates fundamental networking concepts, Python socket programming, and multi-threading techniques essential for cybersecurity professionals.
+This tool scans target IP addresses to identify open ports using TCP socket connections. It demonstrates fundamental networking concepts, Python socket programming, and multi-threading techniques.
 
 ##  Disclaimer
 
@@ -22,5 +22,5 @@ This tool scans target IP addresses to identify open ports using TCP socket conn
 ##  Installation
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/python-port-scanner.git
+git clone https://github.com/Alvalek/python-port-scanner.git
 cd python-port-scanner
