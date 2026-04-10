@@ -8,7 +8,7 @@ This tool scans target IP addresses to identify open ports using TCP socket conn
 
 ##  Disclaimer
 
-**This tool is for educational purposes only.** Only scan networks you own or have explicit permission to test. Unauthorized scanning may violate laws and terms of service.
+**This tool is for educational purposes only.** Only scan networks you own or have explicit permission to test. Unauthorized scanning may violate local laws.
 
 ##  Features
 
