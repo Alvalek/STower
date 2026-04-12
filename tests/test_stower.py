@@ -2,8 +2,13 @@ import pytest
 import socket
 from unittest.mock import patch, MagicMock
 import sys
-sys.path.insert(0, '..')
-from stower.stower import STower
+import os
+# Add parent directory to Python path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import pytest
+import socket
+from unittest.mock import patch, MagicMock
+from stower import STower 
 
 # --- Test 1: Initialization ---
 def test_stower_initialization():
