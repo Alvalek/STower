@@ -54,7 +54,8 @@ class STower:
                         elif "nginx" in banner: service_name = "nginx"
                         elif "Microsoft-IIS" in banner: service_name = "IIS"
                         elif "SSH" in banner: service_name = "SSH"
-                        elif "HTTP" in banner: service_name = "HTTP"
+                        elif "FTP" in banner: service_name = "FTP"
+                        else: service_name = "HTTP" 
                 except:
                     pass
                 
