@@ -1,7 +1,7 @@
 import pytest
 import socket
 from unittest.mock import patch, MagicMock
-from stower import STower
+from stower.stower import STower
 
 # --- Test 1: Initialization ---
 def test_stower_initialization():
