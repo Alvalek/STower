@@ -15,6 +15,11 @@
 
 This tool scans target IP addresses to identify open ports using TCP socket connections. It demonstrates fundamental networking concepts, Python socket programming, and multi-threading techniques.
 
+##  Live Demo
+
+Here is a glimpse of the **Terminal Dashboard** interface:
+<img width="1673" height="578" alt="Screenshot_20260412_031852" src="https://github.com/user-attachments/assets/7bcb8b71-c866-453f-bc05-829a72279ad9" />
+
 ##  Features
 
 - Multi-Threading: Concurrent scanning using Python's threading module for rapid results.
