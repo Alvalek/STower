@@ -26,8 +26,13 @@ class STower:
         self.results = []
         self.threads = []
         
-    def scan_port(self, port):
-        """Scan a single port with banner grabbing."""
+        def scan_port(self, port):
+        """Scan a single port with enhanced logging."""
+        GREEN = '\033[92m'
+        RED = '\033[91m'
+        YELLOW = '\033[93m'
+        RESET = '\033[0m'
+        
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(0.5)
@@ -38,22 +43,20 @@ class STower:
             banner = None
             
             if result == 0:
-                
                 try:
                     sock.send(b'GET / HTTP/1.0\r\n\r\n')
                     banner_data = sock.recv(1024).decode('utf-8', errors='ignore').strip()
                     if banner_data:
-                        banner = banner_data.split('\r\n')[0] 
+                        banner = banner_data.split('\r\n')[0]
                         if "Apache" in banner: service_name = "Apache"
                         elif "nginx" in banner: service_name = "nginx"
                         elif "Microsoft-IIS" in banner: service_name = "IIS"
                         elif "SSH" in banner: service_name = "SSH"
+                        elif "HTTP" in banner: service_name = "HTTP"
                 except:
-                    pass 
+                    pass
                 
                 self.open_ports.append(port)
-                
-                
                 self.results.append({
                     "port": port,
                     "state": "OPEN",
@@ -61,11 +64,12 @@ class STower:
                     "banner": banner
                 })
                 
-                print(f"[+] Port {port}: OPEN ({service_name})")
-                if banner:
-                    print(f"    └─ Banner: {banner[:50]}...")
-            else:
                 
+                banner_str = f" | BANNER: {banner[:40]}..." if banner else ""
+                print(f"{GREEN}[+] {port:5d} | OPEN  | {service_name:10s}{banner_str}{RESET}")
+                
+            else:
+               
                 pass
                 
             sock.close()
@@ -104,13 +108,29 @@ class STower:
 
         self._print_summary()
 
-    def _print_summary(self):
-        print("\n" + "="*60)
-        print(f"SCAN COMPLETE")
-        print(f"Open Ports Found: {len(self.open_ports)}")
+        def _print_summary(self):
+        GREEN = '\033[92m'
+        RED = '\033[91m'
+        YELLOW = '\033[93m'
+        BLUE = '\033[94m'
+        WHITE = '\033[97m'
+        RESET = '\033[0m'
+        BOLD = '\033[1m'
+
+        print(f"\n{BLUE}════════════════════════════════════════════════════════════════{RESET}")
+        print(f"{BOLD}{WHITE}SCAN REPORT SUMMARY{RESET}")
+        print(f"{BLUE}════════════════════════════════════════════════════════════════{RESET}")
+        print(f"{WHITE}Target:      {self.target}{RESET}")
+        print(f"{WHITE}Ports Scanned: {self.end_port - self.start_port + 1}{RESET}")
+        print(f"{WHITE}Open Ports:  {GREEN}{len(self.open_ports)}{RESET}")
+        
         if self.open_ports:
-            print(f"Ports: {self.open_ports}")
-        print("="*60 + "\n")
+            print(f"\n{YELLOW}DETECTED SERVICES:{RESET}")
+            for res in self.results:
+                banner_preview = f" ({res['banner'][:30]}...)" if res['banner'] else ""
+                print(f"   • Port {res['port']:5d}: {res['service']}{banner_preview}")
+        
+        print(f"{BLUE}════════════════════════════════════════════════════════════════{RESET}\n")
 
     def export_results(self, filename, format_type="json"):
         """NEW: Export results to JSON or CSV."""
@@ -158,22 +178,38 @@ def grab_banner(self, port):
         return None
 
 def banner():
-    logo = """
-    ╔═══════════════════════════════════════════════════════╗
-    ║                                                       ║
-    ║   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄   ║
-    ║   █  S T O W E R  -  S I G N A L  T O W E R  █   ║
-    ║   █  NETWORK RECONNAISSANCE ENGINE v1.0.0    █   ║
-    ║   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀   ║
-    ║                                                       ║
-    ║   [!] ETHICAL NOTE: Scan only authorized targets ║
-    ║   [!] WARNING: Unauthorized access is a violation of the law  ║
-    ║                                                       ║
-    ╚═══════════════════════════════════════════════════════╝
-    """
-    print(logo)
-    print(f"Initialized at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print("-" * 60)
+    """Display the STower Terminal Dashboard."""
+    GREEN = '\033[92m'
+    RED = '\033[91m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    WHITE = '\033[97m'
+    RESET = '\033[0m'
+    BOLD = '\033[1m'
+
+    print(f"{BLUE}{BOLD}╔════════════════════════════════════════════════════════════════╗{RESET}")
+    print(f"{BLUE}{BOLD}║  STOWER v1.0.0  //  SIGNAL TOWER RECONNAISSANCE ENGINE       ║{RESET}")
+    print(f"{BLUE}{BOLD}╚════════════════════════════════════════════════════════════════╝{RESET}")
+    print()
+    
+    # System Status Block
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"{WHITE}[SYSTEM] Initializing core modules... {GREEN}OK{RESET}")
+    print(f"{WHITE}[SYSTEM] Loading port database... {GREEN}OK{RESET}")
+    print(f"{WHITE}[SYSTEM] Thread pool initialized: {YELLOW}Dynamic{RESET}")
+    print(f"{WHITE}[INFO]  Timestamp: {timestamp}{RESET}")
+    print()
+    
+    # Warning Block
+    print(f"{RED}⚠️  LEGAL NOTICE: {RESET}")
+    print(f"{WHITE}   This tool is meant for authorized security testing. {RESET}")
+    print(f"{WHITE}   Unauthorized scanning can be a violation of federal law.{RESET}")
+    print()
+    
+    # Separator
+    print(f"{BLUE}─" * 60 + "{RESET}")
+    print(f"{WHITE}Ready for target input. Type 'help' for commands.{RESET}")
+    print(f"{BLUE}─" * 60 + "{RESET}\n")
 
 
 
