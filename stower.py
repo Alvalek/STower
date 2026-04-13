@@ -263,9 +263,9 @@ class STower:
         RESET = '\033[0m'                # Reset
         BOLD = '\033[1m'                 # Bold modifier
 
-        print(f"\n{WHITE}============================================================{RESET}")
+        print(f"\n{STD_GREEN}============================================================{RESET}")
         print(f"{WHITE}{BOLD}SCAN REPORT SUMMARY{RESET}")
-        print(f"{WHITE}============================================================{RESET}")
+        print(f"{STD_GREEN}============================================================{RESET}")
         
         # Use STD_GREEN for labels to make them subtle
         print(f"{STD_GREEN}Target:      {self.target}{RESET}")
@@ -292,7 +292,7 @@ class STower:
                     # Use BRIGHT_GREEN for the port list
                     print(f"   {BRIGHT_GREEN}[+] Port {res['port']:5d}: {res['service']}{version_note}{banner_preview}{RESET}")
         
-        print(f"{WHITE}============================================================{RESET}\n")
+        print(f"{STD_GREEN}============================================================{RESET}\n")
 
     def export_results(self, filename, format_type="json"):
         """NEW: Export results to JSON or CSV."""
