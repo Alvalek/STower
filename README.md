@@ -5,6 +5,7 @@
 ![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 ![Status](https://img.shields.io/badge/Status-Production-ready-brightgreen)
+![Tests](https://img.shields.io/badge/tests-6%20passed-success)
 
 **STower** is a multi-threaded port scanner designed for cybersecurity education and authorized network auditing. It combines speed, accuracy, and detailed service detection to provide a professional-grade reconnaissance tool.
 
