@@ -104,10 +104,7 @@ stower/
 ├── .gitignore         # Git ignore rules
 └── tests/             # Unit tests (coming soon)
 ```
-## License
 
-MIT © STower
-Creator - [Alvalek](https://github.com/Alvalek)
 
 ##  Smart Host Discovery (`--discover`)
 STower uses a **hybrid discovery method**:
@@ -115,3 +112,8 @@ STower uses a **hybrid discovery method**:
 python stower.py -t 192.168.1.1 --discover
 ```
 Uses ICMP ping first, then falls back to TCP handshake on ports 80, 443, and 22. Prevents wasted time on dead hosts.
+
+## License
+
+MIT © STower<br>
+Creator - [Alvalek](https://github.com/Alvalek)
