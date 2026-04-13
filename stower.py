@@ -181,7 +181,7 @@ class STower:
                 version_str = f" [{version_info['version']}]" if version_info["version"] != "Unknown" else ""
                 
                 # Determine Status Symbol and Color
-                if version_info["vuln_status"] == "VULNERABLE":
+            if version_info["vuln_status"] == "VULNERABLE":
                 # VULNERABLE: Bright Red (Urgent)
                 status_color = RED
                 status_symbol = "[VULN]"
