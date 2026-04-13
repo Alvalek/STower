@@ -124,7 +124,7 @@ class STower:
         
         return False
         
-    def scan_port(self, port, delay=0.0):
+        def scan_port(self, port, delay=0.0):
         """Scan a single port with enhanced logging and version detection."""
         DIM_GREEN = '\033[90m\033[2m'      # Dim, faint green for system logs
         BRIGHT_GREEN = '\033[92m\033[1m'   # Bright, bold green for success/open
@@ -180,25 +180,18 @@ class STower:
                 banner_str = f" | BANNER: {banner[:40]}..." if banner else ""
                 version_str = f" [{version_info['version']}]" if version_info["version"] != "Unknown" else ""
                 
-                # Determine Status Symbol and Color
-            if version_info["vuln_status"] == "VULNERABLE":
-                # VULNERABLE: Bright Red (Urgent)
-                status_color = RED
-                status_symbol = "[VULN]"
-                print(f"{status_color}[+] {port:5d} | OPEN  | {service_name:10s}{version_str}{banner_str} {status_symbol}{RESET}")
-                print(f"{RED}    [-] ALERT: {version_info['details']}{RESET}")
-            else:
-                # SUCCESS: Bright Bold Green (Clear)
-                status_color = BRIGHT_GREEN
-                status_symbol = "[OK]"
-                print(f"{status_color}[+] {port:5d} | OPEN  | {service_name:10s}{version_str}{banner_str} {status_symbol}{RESET}")
-                
-                # Print Vulnerability Details if found
+                # Determine Status Symbol and Color (CORRECTLY INDENTED)
                 if version_info["vuln_status"] == "VULNERABLE":
-                    print(f"    [-] ALERT: {version_info['details']}")
-                
+                    # VULNERABLE: Bright Red (Urgent)
+                    status_color = RED
+                    status_symbol = "[VULN]"
+                    print(f"{status_color}[+] {port:5d} | OPEN  | {service_name:10s}{version_str}{banner_str} {status_symbol}{RESET}")
+                    print(f"{RED}    [-] ALERT: {version_info['details']}{RESET}")
                 else:
-                    pass
+                    # SUCCESS: Bright Bold Green (Clear)
+                    status_color = BRIGHT_GREEN
+                    status_symbol = "[OK]"
+                    print(f"{status_color}[+] {port:5d} | OPEN  | {service_name:10s}{version_str}{banner_str} {status_symbol}{RESET}")
                 
             sock.close()
             
@@ -259,11 +252,12 @@ class STower:
         self._print_summary()
 
     def _print_summary(self):
-        GREEN = '\033[92m'
-        RED = '\033[91m'
-        YELLOW = '\033[93m'
-        BLUE = '\033[94m'
+        # DEFINE COLORS HERE (each method needs its own color definitions)
+        DIM_GREEN = '\033[90m\033[2m'
+        BRIGHT_GREEN = '\033[92m\033[1m'
+        RED = '\033[91m\033[1m'
         WHITE = '\033[97m'
+        CYAN = '\033[96m'
         RESET = '\033[0m'
         BOLD = '\033[1m'
 
