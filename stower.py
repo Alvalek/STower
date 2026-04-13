@@ -126,10 +126,12 @@ class STower:
         
     def scan_port(self, port, delay=0.0):
         """Scan a single port with enhanced logging and version detection."""
-        GREEN = '\033[92m'
-        RED = '\033[91m'
-        YELLOW = '\033[93m'
-        RESET = '\033[0m'
+        DIM_GREEN = '\033[90m\033[2m'      # Dim, faint green for system logs
+        BRIGHT_GREEN = '\033[92m\033[1m'   # Bright, bold green for success/open
+        RED = '\033[91m\033[1m'            # Bright red for errors/vulns
+        WHITE = '\033[97m'                 # White for headers
+        CYAN = '\033[96m'                  # Cyan for accents (optional)
+        RESET = '\033[0m'                  # Reset to default
         
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -180,12 +182,15 @@ class STower:
                 
                 # Determine Status Symbol and Color
                 if version_info["vuln_status"] == "VULNERABLE":
-                    status_color = RED
-                    status_symbol = "[VULN]"
-                else:
-                    status_color = GREEN
-                    status_symbol = "[OK]"
-                
+                # VULNERABLE: Bright Red (Urgent)
+                status_color = RED
+                status_symbol = "[VULN]"
+                print(f"{status_color}[+] {port:5d} | OPEN  | {service_name:10s}{version_str}{banner_str} {status_symbol}{RESET}")
+                print(f"{RED}    [-] ALERT: {version_info['details']}{RESET}")
+            else:
+                # SUCCESS: Bright Bold Green (Clear)
+                status_color = BRIGHT_GREEN
+                status_symbol = "[OK]"
                 print(f"{status_color}[+] {port:5d} | OPEN  | {service_name:10s}{version_str}{banner_str} {status_symbol}{RESET}")
                 
                 # Print Vulnerability Details if found
@@ -262,33 +267,36 @@ class STower:
         RESET = '\033[0m'
         BOLD = '\033[1m'
 
-        print(f"\n{BLUE}============================================================{RESET}")
-        print(f"{BOLD}{WHITE}SCAN REPORT SUMMARY{RESET}")
-        print(f"{BLUE}============================================================{RESET}")
-        print(f"{WHITE}Target:      {self.target}{RESET}")
-        print(f"{WHITE}Ports Scanned: {self.end_port - self.start_port + 1}{RESET}")
-        print(f"{WHITE}Open Ports:  {GREEN}{len(self.open_ports)}{RESET}")
+        print(f"\n{WHITE}============================================================{RESET}")
+        print(f"{WHITE}{BOLD}SCAN REPORT SUMMARY{RESET}")
+        print(f"{WHITE}============================================================{RESET}")
+        
+        # Use DIM_GREEN for labels to make them subtle
+        print(f"{DIM_GREEN}Target:      {self.target}{RESET}")
+        print(f"{DIM_GREEN}Ports Scanned: {self.end_port - self.start_port + 1}{RESET}")
+        print(f"{DIM_GREEN}Open Ports:  {BRIGHT_GREEN}{len(self.open_ports)}{RESET}")
         
         vulns = [r for r in self.results if r["vuln_status"] == "VULNERABLE"]
         if vulns:
+            # Red header for critical findings
             print(f"\n{RED}[!] CRITICAL FINDINGS: {len(vulns)} VULNERABLE SERVICE(S) DETECTED{RESET}")
             for v in vulns:
-                print(f"   [+] Port {v['port']}: {v['version']}")
-                print(f"       {v['vuln_details']}")
+                print(f"{WHITE}   [+] Port {v['port']}: {v['version']}{RESET}")
+                print(f"{RED}       {v['vuln_details']}{RESET}")
         
         if self.open_ports:
-            print(f"\n{YELLOW}DETECTED SERVICES:{RESET}")
+            print(f"\n{CYAN}DETECTED SERVICES:{RESET}")
             for res in self.results:
                 banner_preview = f" ({res['banner'][:30]}...)" if res['banner'] else ""
                 version_note = f" [{res['version']}]" if res['version'] != "Unknown" else ""
                 
-                
                 if res["vuln_status"] == "VULNERABLE":
                     print(f"   {RED}[!] Port {res['port']:5d}: {res['service']}{version_note}{banner_preview}{RESET}")
                 else:
-                    print(f"   [+] Port {res['port']:5d}: {res['service']}{version_note}{banner_preview}")
+                    # Use BRIGHT_GREEN for the port list
+                    print(f"   {BRIGHT_GREEN}[+] Port {res['port']:5d}: {res['service']}{version_note}{banner_preview}{RESET}")
         
-        print(f"{BLUE}============================================================{RESET}\n")
+        print(f"{WHITE}============================================================{RESET}\n")
 
     def export_results(self, filename, format_type="json"):
         """NEW: Export results to JSON or CSV."""
@@ -336,38 +344,44 @@ def grab_banner(self, port):
         return None
 
 def banner():
-    """Display the STower Terminal Dashboard."""
-    GREEN = '\033[92m'
-    RED = '\033[91m'
-    YELLOW = '\033[93m'
-    BLUE = '\033[94m'
-    WHITE = '\033[97m'
+    """Display the STower Retro Terminal Dashboard."""
+    DIM_GREEN = '\033[90m\033[2m'      
+    BRIGHT_GREEN = '\033[92m\033[1m'  
+    RED = '\033[91m\033[1m'            
+    WHITE = '\033[97m'              
     RESET = '\033[0m'
     BOLD = '\033[1m'
 
-    print(f"{BLUE}{BOLD}╔════════════════════════════════════════════════════════════════╗{RESET}")
-    print(f"{BLUE}{BOLD}║  STOWER v1.0.0  //  SIGNAL TOWER RECONNAISSANCE ENGINE       ║{RESET}")
-    print(f"{BLUE}{BOLD}╚════════════════════════════════════════════════════════════════╝{RESET}")
+    # System Boot Sequence (Dim Green)
+    print(f"{DIM_GREEN}Initializing STower v1.0.0...{RESET}")
+    print(f"{DIM_GREEN}Loading kernel modules... OK{RESET}")
+    print(f"{DIM_GREEN}Establishing connection... OK{RESET}")
+    print(f"{DIM_GREEN}System ready.{RESET}\n")
+
+    # Main Title (Bright Green)
+    print(f"{BRIGHT_GREEN}╔════════════════════════════════════════════════════════════════╗{RESET}")
+    print(f"{BRIGHT_GREEN}║  STOWER v1.0.0  //  SIGNAL TOWER RECONNAISSANCE ENGINE       ║{RESET}")
+    print(f"{BRIGHT_GREEN}╚════════════════════════════════════════════════════════════════╝{RESET}")
     print()
-    
-    # System Status Block
+
+    # System Status (White labels, Green/Dim values)
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"{WHITE}[SYSTEM] Initializing core modules... {GREEN}OK{RESET}")
-    print(f"{WHITE}[SYSTEM] Loading port database... {GREEN}OK{RESET}")
-    print(f"{WHITE}[SYSTEM] Thread pool initialized: {YELLOW}Dynamic{RESET}")
-    print(f"{WHITE}[INFO]  Timestamp: {timestamp}{RESET}")
+    print(f"{WHITE}[SYSTEM] Initializing core modules... {BRIGHT_GREEN}OK{RESET}")
+    print(f"{WHITE}[SYSTEM] Loading port database... {BRIGHT_GREEN}OK{RESET}")
+    print(f"{WHITE}[SYSTEM] Thread pool initialized: {DIM_GREEN}Dynamic{RESET}")
+    print(f"{WHITE}[INFO]  Timestamp: {DIM_GREEN}{timestamp}{RESET}")
     print()
-    
-    # Warning Block
-    print(f"{RED}⚠  LEGAL NOTICE: {RESET}")
+
+    # Warning Block (Red for urgency)
+    print(f"{RED}[!] LEGAL NOTICE: {RESET}")
     print(f"{WHITE}   This tool is meant for authorized security testing. {RESET}")
     print(f"{WHITE}   Unauthorized scanning may be considered a violation of federal law.{RESET}")
     print()
-    
-    # Separator
-    print(f"{BLUE}─" * 60 + "{RESET}")
+
+    # Separator (Dim Green)
+    print(f"{DIM_GREEN}─" * 60 + "{RESET}")
     print(f"{WHITE}Ready for target input. Type 'help' for commands.{RESET}")
-    print(f"{BLUE}─" * 60 + "{RESET}\n")
+    print(f"{DIM_GREEN}─" * 60 + "{RESET}\n")
 
 
 
