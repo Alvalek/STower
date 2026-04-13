@@ -20,6 +20,15 @@ import platform
 import time  
 import random 
 
+# Mock Vulnerability Database (For Educational Purposes)
+KNOWN_VULNS = {
+    "Apache/2.4.49": {"cve": "CVE-2021-41773", "severity": "CRITICAL", "desc": "Path Traversal"},
+    "Apache/2.4.50": {"cve": "CVE-2021-42013", "severity": "CRITICAL", "desc": "Path Traversal"},
+    "OpenSSH/7.4":   {"cve": "CVE-2018-15919", "severity": "HIGH", "desc": "Authentication Bypass"},
+    "nginx/1.18.0":  {"cve": "CVE-2021-23017", "severity": "MEDIUM", "desc": "DNS Resolver Overflow"},
+    "PHP/7.2.0":     {"cve": "CVE-2019-11043", "severity": "HIGH", "desc": "RCE via CGI"},
+}
+
 class STower:
     """
     STower: Signal Tower - Network Reconnaissance Engine
@@ -31,6 +40,54 @@ class STower:
         self.open_ports = []
         self.results = []
         self.threads = []
+
+    def detect_version(self, port, banner=None):
+        """
+        Attempt to detect service version and check against known vulnerabilities.
+        
+        Args:
+            port (int): The port number.
+            banner (str): The initial banner string (optional).
+            
+        Returns:
+            dict: Contains 'version', 'vuln_status', and 'details'.
+        """
+        result = {
+            "version": "Unknown",
+            "vuln_status": "Safe",
+            "details": None
+        }
+
+        
+        if banner:
+            if "Apache/" in banner:
+                
+                parts = banner.split("Apache/")
+                if len(parts) > 1:
+                    version_str = parts[1].split()[0] 
+                    result["version"] = f"Apache/{version_str}"
+            elif "nginx/" in banner:
+                parts = banner.split("nginx/")
+                if len(parts) > 1:
+                    version_str = parts[1].split()[0]
+                    result["version"] = f"nginx/{version_str}"
+            elif "SSH-" in banner:
+                if "OpenSSH_" in banner:
+                    version_str = banner.split("OpenSSH_")[1].split()[0]
+                    result["version"] = f"OpenSSH/{version_str}"
+            elif "Microsoft-IIS/" in banner:
+                parts = banner.split("Microsoft-IIS/")
+                if len(parts) > 1:
+                    version_str = parts[1].split()[0]
+                    result["version"] = f"IIS/{version_str}"
+        
+       
+        if result["version"] != "Unknown" and result["version"] in KNOWN_VULNS:
+            vuln_info = KNOWN_VULNS[result["version"]]
+            result["vuln_status"] = "VULNERABLE"
+            result["details"] = f"{vuln_info['cve']} ({vuln_info['severity']}): {vuln_info['desc']}"
+            
+        return result
 
     def is_host_alive(self, timeout=2):
         """
@@ -68,7 +125,7 @@ class STower:
         return False
         
     def scan_port(self, port, delay=0.0):
-        """Scan a single port with enhanced logging."""
+        """Scan a single port with enhanced logging and version detection."""
         GREEN = '\033[92m'
         RED = '\033[91m'
         YELLOW = '\033[93m'
@@ -90,6 +147,8 @@ class STower:
                     if banner_data:
                         banner_lines = banner_data.split('\r\n')[:3]
                         banner = '\r\n'.join(banner_lines)
+                        
+                        # Service Detection
                         if "Apache" in banner: service_name = "Apache"
                         elif "nginx" in banner: service_name = "nginx"
                         elif "Microsoft-IIS" in banner: service_name = "IIS"
@@ -99,20 +158,41 @@ class STower:
                 except:
                     pass
                 
+                # NEW: Detect Version and Check Vulnerabilities
+                version_info = self.detect_version(port, banner)
+                
                 self.open_ports.append(port)
+                
+                # NEW: Store extended result
                 self.results.append({
                     "port": port,
                     "state": "OPEN",
                     "service": service_name,
-                    "banner": banner
+                    "banner": banner,
+                    "version": version_info["version"],
+                    "vuln_status": version_info["vuln_status"],
+                    "vuln_details": version_info["details"]
                 })
                 
-                
+                # NEW: Construct Output String
                 banner_str = f" | BANNER: {banner[:40]}..." if banner else ""
-                print(f"{GREEN}[+] {port:5d} | OPEN  | {service_name:10s}{banner_str}{RESET}")
+                version_str = f" [{version_info['version']}]" if version_info["version"] != "Unknown" else ""
+                
+                # Determine Status Symbol and Color
+                if version_info["vuln_status"] == "VULNERABLE":
+                    status_color = RED
+                    status_symbol = "[VULN]"
+                else:
+                    status_color = GREEN
+                    status_symbol = "[OK]"
+                
+                print(f"{status_color}[+] {port:5d} | OPEN  | {service_name:10s}{version_str}{banner_str} {status_symbol}{RESET}")
+                
+                # Print Vulnerability Details if found
+                if version_info["vuln_status"] == "VULNERABLE":
+                    print(f"    [-] ALERT: {version_info['details']}")
                 
             else:
-               
                 pass
                 
             sock.close()
@@ -122,6 +202,7 @@ class STower:
         except Exception:
             pass
             
+        # Stealth Delay (must be outside try/except to ensure it runs)
         if delay > 0:
             actual_delay = delay + random.uniform(0, delay * 0.2)
             time.sleep(actual_delay)
@@ -181,20 +262,33 @@ class STower:
         RESET = '\033[0m'
         BOLD = '\033[1m'
 
-        print(f"\n{BLUE}════════════════════════════════════════════════════════════════{RESET}")
+        print(f"\n{BLUE}============================================================{RESET}")
         print(f"{BOLD}{WHITE}SCAN REPORT SUMMARY{RESET}")
-        print(f"{BLUE}════════════════════════════════════════════════════════════════{RESET}")
+        print(f"{BLUE}============================================================{RESET}")
         print(f"{WHITE}Target:      {self.target}{RESET}")
         print(f"{WHITE}Ports Scanned: {self.end_port - self.start_port + 1}{RESET}")
         print(f"{WHITE}Open Ports:  {GREEN}{len(self.open_ports)}{RESET}")
+        
+        vulns = [r for r in self.results if r["vuln_status"] == "VULNERABLE"]
+        if vulns:
+            print(f"\n{RED}[!] CRITICAL FINDINGS: {len(vulns)} VULNERABLE SERVICE(S) DETECTED{RESET}")
+            for v in vulns:
+                print(f"   [+] Port {v['port']}: {v['version']}")
+                print(f"       {v['vuln_details']}")
         
         if self.open_ports:
             print(f"\n{YELLOW}DETECTED SERVICES:{RESET}")
             for res in self.results:
                 banner_preview = f" ({res['banner'][:30]}...)" if res['banner'] else ""
-                print(f"   • Port {res['port']:5d}: {res['service']}{banner_preview}")
+                version_note = f" [{res['version']}]" if res['version'] != "Unknown" else ""
+                
+                
+                if res["vuln_status"] == "VULNERABLE":
+                    print(f"   {RED}[!] Port {res['port']:5d}: {res['service']}{version_note}{banner_preview}{RESET}")
+                else:
+                    print(f"   [+] Port {res['port']:5d}: {res['service']}{version_note}{banner_preview}")
         
-        print(f"{BLUE}════════════════════════════════════════════════════════════════{RESET}\n")
+        print(f"{BLUE}============================================================{RESET}\n")
 
     def export_results(self, filename, format_type="json"):
         """NEW: Export results to JSON or CSV."""
