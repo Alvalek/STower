@@ -106,7 +106,8 @@ stower/
 ```
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+MIT © STower
+Creator - [Alvalek](https://github.com/Alvalek)
 
 ##  Smart Host Discovery (`--discover`)
 STower uses a **hybrid discovery method**:
