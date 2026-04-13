@@ -267,7 +267,7 @@ def banner():
     # Warning Block
     print(f"{RED}⚠  LEGAL NOTICE: {RESET}")
     print(f"{WHITE}   This tool is meant for authorized security testing. {RESET}")
-    print(f"{WHITE}   Unauthorized scanning can be a violation of federal law.{RESET}")
+    print(f"{WHITE}   Unauthorized scanning may be considered a violation of federal law.{RESET}")
     print()
     
     # Separator
