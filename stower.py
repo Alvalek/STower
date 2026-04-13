@@ -17,6 +17,8 @@ import csv
 from tqdm import tqdm
 import subprocess
 import platform
+import time  
+import random 
 
 class STower:
     """
@@ -65,7 +67,7 @@ class STower:
         
         return False
         
-    def scan_port(self, port):
+    def scan_port(self, port, delay=0.0):
         """Scan a single port with enhanced logging."""
         GREEN = '\033[92m'
         RED = '\033[91m'
@@ -119,8 +121,12 @@ class STower:
             pass
         except Exception:
             pass
+            
+        if delay > 0:
+            actual_delay = delay + random.uniform(0, delay * 0.2)
+            time.sleep(actual_delay)
     
-    def scan(self, num_threads=50, discover_first=True):
+    def scan(self, num_threads=50, discover_first=True, stealth=False, delay=0.0):
         """Scan with progress bar and threading."""
         if discover_first:
             print(f"\n🔍︎ Performing Smart Host Discovery on {self.target}...")
@@ -138,12 +144,16 @@ class STower:
         print(f"\n🛰 Target: {self.target}")
         print(f"🗓 Range: {self.start_port} - {self.end_port}")
         print(f"ϟ Threads: {num_threads}\n")
-        
+
+        effective_delay = delay
+        if stealth and delay == 0.0:
+            effective_delay = 0.5
+            
         total_ports = self.end_port - self.start_port + 1
         
-        with tqdm(total=total_ports, desc="Scanning", unit="port", colour="green") as pbar:
+        with tqdm(total=total_ports, desc="Scanning", unit="port", colour="white") as pbar:
             for port in range(self.start_port, self.end_port + 1):
-                t = threading.Thread(target=self.scan_port, args=(port,))
+                t = threading.Thread(target=self.scan_port, args=(port, effective_delay))
                 self.threads.append(t)
                 t.start()
                 
@@ -278,6 +288,10 @@ def main():
     parser.add_argument("-f", "--format", choices=["json", "csv"], default="json", help="Output format")
     parser.add_argument("--discover", action="store_true", 
                        help="Check if host is alive (ping) before scanning ports")
+    parser.add_argument("--stealth", action="store_true", 
+                       help="Enable stealth mode with random delays to avoid IDS detection")
+    parser.add_argument("--delay", type=float, default=0.0, 
+                       help="Delay in seconds between port scans (default: 0 for aggressive)")
     
     args = parser.parse_args()
     
@@ -293,7 +307,12 @@ def main():
         print("✖ Ports must be 1-65535"); sys.exit(1)
         
     scanner = STower(args.target, start, end)
-    scanner.scan(num_threads=args.threads, discover_first=args.discover)
+    scanner.scan(
+        num_threads=args.threads, 
+        discover_first=args.discover,
+        stealth=args.stealth,
+        delay=args.delay
+    )
     
     if args.output:
         scanner.export_results(args.output, args.format)
