@@ -208,13 +208,7 @@ class STower:
     
     def scan(self, num_threads=50, discover_first=True, stealth=False, delay=0.0):
         """Scan with progress bar and threading."""
-        STD_GREEN = '\033[32m'           
-        BRIGHT_GREEN = '\033[92m\033[1m'
-        RED = '\033[91m\033[1m'         
-        WHITE = '\033[97m'               
-        CYAN = '\033[96m'                
-        RESET = '\033[0m'                
-        BOLD = '\033[1m'     
+        STD_GREEN = '\033[32m'            
         
         if discover_first:
             print(f"\n🔍︎ Performing Smart Host Discovery on {self.target}...")
