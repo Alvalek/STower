@@ -241,7 +241,7 @@ def banner():
     print()
     
     # Warning Block
-    print(f"{RED}⚠️  LEGAL NOTICE: {RESET}")
+    print(f"{RED}⚠  LEGAL NOTICE: {RESET}")
     print(f"{WHITE}   This tool is meant for authorized security testing. {RESET}")
     print(f"{WHITE}   Unauthorized scanning can be a violation of federal law.{RESET}")
     print()
@@ -273,10 +273,10 @@ def main():
         else:
             start = end = int(args.ports)
     except ValueError:
-        print("❌ Invalid port range."); sys.exit(1)
+        print("⛒ Invalid port range."); sys.exit(1)
         
     if start < 1 or end > 65535:
-        print("❌ Ports must be 1-65535"); sys.exit(1)
+        print("⛒ Ports must be 1-65535"); sys.exit(1)
         
     scanner = STower(args.target, start, end)
     scanner.scan(num_threads=args.threads, discover_first=args.discover)
