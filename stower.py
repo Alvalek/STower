@@ -329,7 +329,7 @@ class STower:
             print(f"{CYAN}[4]{RESET} {STD_GREEN}Toggle Stealth Mode (Current: {stealth_status}{STD_GREEN}){RESET}")
             print(f"{CYAN}[5]{RESET} {STD_GREEN}Toggle Host Discovery (Current: {discover_status}{STD_GREEN}){RESET}")
             print(f"{CYAN}[6]{RESET} {STD_GREEN}Exit{RESET}")
-            print(f"{WHITE}------------------------------------------------------------{RESET}")
+            print(f"{STD_GREEN}------------------------------------------------------------{RESET}")
             
             choice = input(f"{BRIGHT_GREEN}Enter choice [{CYAN}1-6{RESET}]: {RESET}").strip()
 
