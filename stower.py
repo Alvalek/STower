@@ -304,7 +304,7 @@ class STower:
         
         print(f"{STD_GREEN}============================================================{RESET}\n")
 
-        def run_menu(self):
+    def run_menu(self):
         """Interactive menu for non-technical users."""
         STD_GREEN = '\033[32m'
         BRIGHT_GREEN = '\033[92m\033[1m'
