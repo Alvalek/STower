@@ -41,6 +41,10 @@ class STower:
         self.results = []
         self.threads = []
 
+        self.stealth_enabled = False
+        self.discovery_enabled = True
+        self.stealth_delay = 0.5
+
     def detect_version(self, port, banner=None):
         """
         Attempt to detect service version and check against known vulnerabilities.
@@ -206,8 +210,14 @@ class STower:
             actual_delay = delay + random.uniform(0, delay * 0.2)
             time.sleep(actual_delay)
     
-    def scan(self, num_threads=50, discover_first=True, stealth=False, delay=0.0):
-        """Scan with progress bar and threading."""           
+    def scan(self, num_threads=50, discover_first=None, stealth=None, delay=None):
+        """Scan with progress bar and threading."""    
+        if discover_first is None:
+            discover_first = self.discovery_enabled
+        if stealth is None:
+            stealth = self.stealth_enabled
+        if delay is None:
+            delay = self.stealth_delay if stealth else 0.0
         
         if discover_first:
             print(f"\n🔍︎ Performing Smart Host Discovery on {self.target}...")
@@ -294,7 +304,7 @@ class STower:
         
         print(f"{STD_GREEN}============================================================{RESET}\n")
 
-    def run_menu(self):
+        def run_menu(self):
         """Interactive menu for non-technical users."""
         STD_GREEN = '\033[32m'
         BRIGHT_GREEN = '\033[92m\033[1m'
@@ -305,30 +315,40 @@ class STower:
         BOLD = '\033[1m'
 
         while True:
-            # Clear screen for a fresh look (optional, works on most terminals)
-            # os.system('cls' if os.name == 'nt' else 'clear')  
-
             print(f"\n{STD_GREEN}============================================================{RESET}")
             print(f"{BOLD}{STD_GREEN}   STOWER v1.0.0  //  SIGNAL TOWER RECONNAISSANCE ENGINE{RESET}")
             print(f"{STD_GREEN}============================================================{RESET}")
+            
+            # Show current settings
+            stealth_status = f"{BRIGHT_GREEN}ON{RESET}" if self.stealth_enabled else f"{RED}OFF{RESET}"
+            discover_status = f"{BRIGHT_GREEN}ON{RESET}" if self.discovery_enabled else f"{RED}OFF{RESET}"
+            
             print(f"{CYAN}[1]{RESET} {STD_GREEN}Quick Scan (Ports 1-1024){RESET}")
             print(f"{CYAN}[2]{RESET} {STD_GREEN}Full Scan (Ports 1-65535){RESET}")
             print(f"{CYAN}[3]{RESET} {STD_GREEN}Custom Port Range{RESET}")
-            print(f"{CYAN}[4]{RESET} {STD_GREEN}Toggle Stealth Mode (Current: {RED}OFF{RESET}){RESET}")
-            print(f"{CYAN}[5]{RESET} {STD_GREEN}Exit{RESET}")
-            print(f"{STD_GREEN}------------------------------------------------------------{RESET}")
+            print(f"{CYAN}[4]{RESET} {STD_GREEN}Toggle Stealth Mode (Current: {stealth_status}){RESET}")
+            print(f"{CYAN}[5]{RESET} {STD_GREEN}Toggle Host Discovery (Current: {discover_status}){RESET}")
+            print(f"{CYAN}[6]{RESET} {STD_GREEN}Exit{RESET}")
+            print(f"{WHITE}------------------------------------------------------------{RESET}")
             
-            choice = input(f"{BRIGHT_GREEN}Enter choice [{CYAN}1-5{RESET}]: {RESET}").strip()
+            choice = input(f"{BRIGHT_GREEN}Enter choice [{CYAN}1-6{RESET}]: {RESET}").strip()
 
-            if choice == '5':
+            if choice == '6':
                 print(f"\n{RED}[!] Shutting down STower. Stay safe!{RESET}\n")
                 break
             
             elif choice == '4':
-                # Toggle stealth mode logic (simple toggle for now)
-                # In a real app, you'd store this as an instance variable
-                print(f"{STD_GREEN}[+] Stealth mode toggled. (Note: This is a demo toggle){RESET}")
-                # For this demo, we'll just ask the user to confirm settings in the next step
+                # ACTUALLY TOGGLE STEALTH MODE
+                self.stealth_enabled = not self.stealth_enabled
+                status = f"{BRIGHT_GREEN}ON{RESET}" if self.stealth_enabled else f"{RED}OFF{RESET}"
+                print(f"\n{STD_GREEN}[+] Stealth Mode: {status}{RESET}\n")
+                continue
+            
+            elif choice == '5':
+                # ACTUALLY TOGGLE DISCOVERY MODE
+                self.discovery_enabled = not self.discovery_enabled
+                status = f"{BRIGHT_GREEN}ON{RESET}" if self.discovery_enabled else f"{RED}OFF{RESET}"
+                print(f"\n{STD_GREEN}[+] Host Discovery: {status}{RESET}\n")
                 continue
 
             elif choice in ['1', '2', '3']:
@@ -349,30 +369,36 @@ class STower:
                         if '-' in port_input:
                             start, end = map(int, port_input.split('-'))
                         else:
-                            # Single port or comma separated (simplified to single for now)
                             start = end = int(port_input)
                     except ValueError:
                         print(f"{RED}[!] Invalid port range format.{RESET}")
                         continue
 
-                # Ask for Stealth
-                stealth = input(f"{STD_GREEN}Enable Stealth Mode? (y/n): {RESET}").strip().lower() == 'y'
-                delay = 0.5 if stealth else 0.0
+                # Use stored preferences (no need to ask again)
+                delay = self.stealth_delay if self.stealth_enabled else 0.0
 
-                # Ask for Discovery
-                discover = input(f"{STD_GREEN}Perform Host Discovery first? (y/n): {RESET}").strip().lower() == 'y'
-
-                print(f"\n{BRIGHT_GREEN}Starting scan on {target}...{RESET}\n")
+                print(f"\n{BRIGHT_GREEN}Starting scan on {target}...{RESET}")
+                print(f"{STD_GREEN}Settings: Stealth={stealth_status}, Discovery={discover_status}{RESET}\n")
                 
-                # Create a temporary scanner instance for this run
+                # Create scanner with current target
                 scanner = STower(target, start, end)
-                scanner.scan(num_threads=50, discover_first=discover, stealth=stealth, delay=delay)
+                # Copy preferences to new scanner
+                scanner.stealth_enabled = self.stealth_enabled
+                scanner.discovery_enabled = self.discovery_enabled
+                scanner.stealth_delay = self.stealth_delay
+                
+                scanner.scan(
+                    num_threads=50, 
+                    discover_first=self.discovery_enabled,
+                    stealth=self.stealth_enabled,
+                    delay=delay
+                )
                 
                 # Ask to continue
-                cont = input(f"\n{STD_GREEN}Press Enter to return to menu...{RESET}")
+                cont = input(f"\n{WHITE}Press Enter to return to menu...{RESET}")
 
             else:
-                print(f"{RED}[!] Invalid choice. Please select 1-5.{RESET}")
+                print(f"{RED}[!] Invalid choice. Please select 1-6.{RESET}")
 
     def export_results(self, filename, format_type="json"):
         """NEW: Export results to JSON or CSV."""
